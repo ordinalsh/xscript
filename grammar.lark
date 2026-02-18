@@ -1,0 +1,18 @@
+start: commands*
+commands: set
+
+atom: CNAME | STRING | STRING
+expr: atom
+    | expr "+" expr 
+    | expr "-" expr
+    | expr "/" expr
+    | expr "*" expr
+
+set: "local" CNAME "=" expr
+
+%import common.CNAME
+%import common.NUMBER -> INTEGER
+%import common.ESCAPED_STRING -> STRING
+%import common.WS
+
+%ignore WS
