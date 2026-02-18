@@ -25,7 +25,7 @@ call: expr "("args?")"
 func: "fn" CNAME "{" commands* "}"
     | "fn" CNAME "(" arg_names ")" "{" commands* "}" -> func_args
 
-?condition: expr
+condition: expr
           | condition "==" condition -> equ
           | condition "!=" condition -> nequ
           | condition ">" condition -> gt
@@ -45,9 +45,8 @@ fi: "if" condition "{" commands* "}"
 """
 
 test_code = """
-fn loop {
-    fn call_this_on_loop(string) { print(string) }
-    call_this_on_loop("Hello world, this will be looped, depending on the engine that uses XScript")
+if a == 1 {
+    print("Hello world")
 }
 """
 
@@ -56,20 +55,33 @@ parser = Lark(grammar, parser="lalr")
 class XScriptAST(Transformer):
     def start(self, items): return items
 
+    # transformaciones para el AST
     def INTEGER(self, token): return int(token)
     def STRING(self, token): return token[1:-1]
     def CNAME(self, token): return ("reference", str(token))
-    def member(self, items):
-        # Usamos una "list comprehension" para extraer el segundo elemento (índice 1)
-        return ("reference_group", *(item[1] for item in items))
-    def arg_names(self, items):
-        return [item[1] for item in items]
+    def member(self, items): return ("reference_group", *(item[1] for item in items))
+    def arg_names(self, items): return [item[1] for item in items]
+    
+    # condiciones
+    def condition(self, items): return items[0]
+    def equ(self, items): return ("equ", items[0], items[1])
+    def nequ(self, items): return ("nequ", items[0], items[1])
+    def gt(self, items): return ("gt", items[0], items[1])
+    def lt(self, items): return ("lt", items[0], items[1])
+    def gte(self, items): return ("gte", items[0], items[1])
+    def lte(self, items): return ("gte", items[0], items[1])
 
+    # funciones, variables y llamadas
     def set(self, items): return {"set": items[0], "value": items[1]}
     def call(self, items): return {"call": items[0], "arguments": items[1:]}
     def func(self, items): return {"func": items[0][1], "block": items[1:]}
     def func_args(self, items): return {"func": items[0][1], "arguments": items[1], "block": items[2:]}
     
+    # flujos
+    def fi(self, items):
+        return {"if": items[0], "block": items[1:]}
+
+    # expresiones
     def plus(self, items): return ("add", items[0], items[1])
     def sub(self, items): return ("sub", items[0], items[1])
     def mul(self, items): return ("mul", items[0], items[1])
