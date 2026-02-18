@@ -45,9 +45,8 @@ fi: "if" condition "{" commands* "}"
 """
 
 test_code = """
-if a == 1 {
-    print("Hello world")
-}
+local a = 10
+print(a)
 """
 
 parser = Lark(grammar, parser="lalr")
@@ -72,14 +71,14 @@ class XScriptAST(Transformer):
     def lte(self, items): return ("gte", items[0], items[1])
 
     # funciones, variables y llamadas
-    def set(self, items): return {"set": items[0], "value": items[1]}
-    def call(self, items): return {"call": items[0], "arguments": items[1:]}
-    def func(self, items): return {"func": items[0][1], "block": items[1:]}
-    def func_args(self, items): return {"func": items[0][1], "arguments": items[1], "block": items[2:]}
+    def set(self, items): return {"op": "set", "define": items[0], "value": items[1]}
+    def call(self, items): return {"op": "call", "function": items[0], "arguments": items[1:]}
+    def func(self, items): return {"op": "new_function", "name": items[0][1], "block": items[1:]}
+    def func_args(self, items): return {"op": "new_function", "name": items[0][1], "arguments": items[1], "block": items[2:]}
     
     # flujos
     def fi(self, items):
-        return {"if": items[0], "block": items[1:]}
+        return {"op": "fi", "condition": items[0], "block": items[1:]}
 
     # expresiones
     def plus(self, items): return ("add", items[0], items[1])
