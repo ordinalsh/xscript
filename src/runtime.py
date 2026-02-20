@@ -94,6 +94,7 @@ class RunScript(object):
         self.run_block(fn_block)
         self.defines.remove_scope()
 
+
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
         print(self.defines.defines)
@@ -122,3 +123,8 @@ class RunScript(object):
             "arguments": arguments,
             "block": block,
         })
+
+    def free(self, scope, name, **_):
+        if not scope in self.defines.defines:
+            raise RuntimeError(f"there is no scope created with the name '{scope}'")
+        del self.defines.defines[scope][name]
