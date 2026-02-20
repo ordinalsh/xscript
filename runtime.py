@@ -32,13 +32,7 @@ class RuntimeScript(object):
             elif expr_type == "div":
                 return self.evaluate_expression(expr[1]) / self.evaluate_expression(expr[2])
 
-    def evaluate_args(self, args:list):
-        args_list = []
-
-        for arg in args:
-            args_list.append(self.evaluate_expression(arg))
-        
-        return args_list
+    def evaluate_args(self, args: list): return list(map(self.evaluate_expression, args))
 
     def set(self, define, value, **_): 
         self.defines[define[1]] = {"type": "variable", "value": self.evaluate_expression(value), "scope": self.scopes[-1]}
