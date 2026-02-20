@@ -84,5 +84,5 @@ class RunScript(object):
         
         if isinstance(callable_value, list): ...
         elif isinstance(callable_value, object):
-            print(self.eval_arguments(arguments))
+            #print(self.eval_arguments(arguments))
             callable_value(*self.eval_arguments(arguments))
