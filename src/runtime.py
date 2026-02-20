@@ -1,3 +1,5 @@
+from rich import print
+
 class DefinesManager:
     def __init__(self):
         self.scopes = ["script"]
@@ -40,10 +42,16 @@ class RunScript(object):
     def __init__(self, ast):
         self.defines = DefinesManager()
 
+        print(ast)
+        print("\n","·"*132,"\n")
+
         if not isinstance(ast, list):
             ast = [ast]
+        self.run_block(ast)
 
+    def run_block(self, ast):
         for astobject in ast:
+            #print(astobject)
             operation = getattr(self, astobject["op"])
             operation(**astobject)
 
@@ -65,7 +73,27 @@ class RunScript(object):
             case "mul": return self.eval_expression(expression[1]) * self.eval_expression(expression[2]) # multiplicar
     
     def eval_arguments(self, args: list): return list(map(self.eval_expression, args))        
-    
+
+    def eval_function(self, fnname, arguments):
+        function = self.defines.find_define(fnname)
+        fn_arguments = function["value"]["arguments"]
+        fn_block = function["value"]["block"]
+
+        if function["type"] != "function":
+            raise RuntimeError(f"define with name '{fnname}' is not callable.")
+        
+        self.defines.add_scope(fnname)
+        if len(fn_arguments) > len(arguments):
+            raise RuntimeError(f"the function '{fnname}' requires those arguments {fn_arguments}")
+        elif len(arguments) > len(fn_arguments):
+            raise RuntimeError(f"the function '{fnname}' only accepts {len(fn_arguments)} arguments, but you passed {len(arguments)}")
+
+        for index, argument in enumerate(arguments):
+            self.defines.set_define(fn_arguments[index], "variable", argument) # los argumentos ya estan parseados por el eval_expression
+        
+        self.run_block(fn_block)
+        self.defines.remove_scope()
+
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
         print(self.defines.defines)
@@ -82,7 +110,15 @@ class RunScript(object):
         if callable_type != "function": 
             raise RuntimeError(f"no define with name '{function}' that can be callable.")
         
-        if isinstance(callable_value, list): ...
+        if isinstance(callable_value, dict): 
+            self.eval_function(function, self.eval_arguments(arguments))
+
         elif isinstance(callable_value, object):
             #print(self.eval_arguments(arguments))
             callable_value(*self.eval_arguments(arguments))
+
+    def new_function(self, name, block, arguments=None, **_):
+        self.defines.set_define(name, "function", {
+            "arguments": arguments,
+            "block": block,
+        })
