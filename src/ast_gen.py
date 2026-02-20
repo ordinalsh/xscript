@@ -14,7 +14,6 @@ class XScriptAST(Transformer):
     def CNAME(self, token): return ("reference", str(token))
     def member(self, items): return ("reference_group", *(item[1] for item in items))
     def arg_names(self, items): return [item[1] for item in items]
-    def args(self, items): return list(items)
 
     # condiciones
     def condition(self, items): return items[0]
@@ -27,7 +26,7 @@ class XScriptAST(Transformer):
 
     # funciones, variables y llamadas
     def set(self, items): return {"op": "set", "define": items[0], "value": items[1]}
-    def call(self, items): return {"op": "call", "function": items[0], "arguments": items[1]}
+    def call(self, items): return {"op": "call", "function": items[0], "arguments": items[1:]}
     def func(self, items): return {"op": "new_function", "name": items[0][1], "block": items[1:]}
     def func_args(self, items): return {"op": "new_function", "name": items[0][1], "arguments": items[1], "block": items[2:]}
     

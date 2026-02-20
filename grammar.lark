@@ -10,14 +10,13 @@
     | expr "/" expr -> div
     | expr "*" expr -> mul
 
-args: expr ("," expr)*
 arg_names: CNAME ("," CNAME)*
 ?member: expr "." CNAME
     
 require: "require" STRING "as" CNAME
 set: "local" CNAME "=" expr
-call: expr "("args?")"
-func: "fn" CNAME "{" commands* "}"
+call: expr "("(expr ("," expr)*)?")"
+func: "fn" CNAME "{" commands* "}" | "fn" CNAME "("")" "{" commands* "}"
     | "fn" CNAME "(" arg_names ")" "{" commands* "}" -> func_args
 
 condition: expr
