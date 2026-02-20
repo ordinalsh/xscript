@@ -52,8 +52,10 @@ class RunScript(object):
                 
                 return reference["value"] # devolver la referencia
             
-            case "add":
-                return self.eval_expression(expression[1]) + self.eval_expression(expression[2])
+            case "add": return self.eval_expression(expression[1]) + self.eval_expression(expression[2]) # sumar
+            case "sub": return self.eval_expression(expression[1]) - self.eval_expression(expression[2]) # restar
+            case "div": return self.eval_expression(expression[1]) / self.eval_expression(expression[2]) # dividir
+            case "mul": return self.eval_expression(expression[1]) * self.eval_expression(expression[2]) # multiplicar
             
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))

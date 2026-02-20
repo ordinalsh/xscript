@@ -1,2 +1,3 @@
 local a = 20
 local b = a + 2
+local c = b*2
