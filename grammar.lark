@@ -10,7 +10,7 @@
     | expr "/" expr -> div
     | expr "*" expr -> mul
 
-?args: expr ("," expr)*
+args: expr ("," expr)*
 arg_names: CNAME ("," CNAME)*
 ?member: expr "." CNAME
     
