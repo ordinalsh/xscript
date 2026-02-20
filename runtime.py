@@ -52,6 +52,9 @@ class RunScript(object):
                 
                 return reference["value"] # devolver la referencia
             
+            case "add":
+                return self.eval_expression(expression[1]) + self.eval_expression(expression[2])
+            
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
         print(self.defines.defines)

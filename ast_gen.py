@@ -2,53 +2,7 @@ from lark import Lark
 from lark.visitors import Transformer
 from rich import print
 
-grammar = """
-?start: commands*
-?commands: set | require | call | func | fi
-
-?atom: CNAME | INTEGER | STRING
-?expr: call
-    | member
-    | atom
-    | expr "+" expr -> plus
-    | expr "-" expr -> sub
-    | expr "/" expr -> div
-    | expr "*" expr -> mul
-
-?args: expr ("," expr)*
-arg_names: CNAME ("," CNAME)*
-?member: expr "." CNAME
-    
-require: "require" STRING "as" CNAME
-set: "local" CNAME "=" expr
-call: expr "("args?")"
-func: "fn" CNAME "{" commands* "}"
-    | "fn" CNAME "(" arg_names ")" "{" commands* "}" -> func_args
-
-condition: expr
-          | condition "==" condition -> equ
-          | condition "!=" condition -> nequ
-          | condition ">" condition -> gt
-          | condition "<" condition -> lt
-          | condition ">=" condition -> gte
-          | condition "<=" condition -> lte
-
-fi: "if" condition "{" commands* "}"
-
-
-%import common.CNAME
-%import common.NUMBER -> INTEGER
-%import common.ESCAPED_STRING -> STRING
-%import common.WS
-
-%ignore WS
-"""
-
-test_code = """
-local a = 10
-local b = a
-"""
-
+grammar = open("grammar.lark", "r")
 parser = Lark(grammar, parser="lalr")
 
 class XScriptAST(Transformer):
@@ -86,5 +40,3 @@ class XScriptAST(Transformer):
     def sub(self, items): return ("sub", items[0], items[1])
     def mul(self, items): return ("mul", items[0], items[1])
     def div(self, items): return ("div", items[0], items[1])
-
-print(XScriptAST().transform(parser.parse(test_code)))

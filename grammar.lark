@@ -1,14 +1,35 @@
-start: commands*
-commands: set
+?start: commands*
+?commands: set | require | call | func | fi
 
-atom: CNAME | STRING | STRING
-expr: atom
-    | expr "+" expr 
-    | expr "-" expr
-    | expr "/" expr
-    | expr "*" expr
+?atom: CNAME | INTEGER | STRING
+?expr: call
+    | member
+    | atom
+    | expr "+" expr -> plus
+    | expr "-" expr -> sub
+    | expr "/" expr -> div
+    | expr "*" expr -> mul
 
+?args: expr ("," expr)*
+arg_names: CNAME ("," CNAME)*
+?member: expr "." CNAME
+    
+require: "require" STRING "as" CNAME
 set: "local" CNAME "=" expr
+call: expr "("args?")"
+func: "fn" CNAME "{" commands* "}"
+    | "fn" CNAME "(" arg_names ")" "{" commands* "}" -> func_args
+
+condition: expr
+          | condition "==" condition -> equ
+          | condition "!=" condition -> nequ
+          | condition ">" condition -> gt
+          | condition "<" condition -> lt
+          | condition ">=" condition -> gte
+          | condition "<=" condition -> lte
+
+fi: "if" condition "{" commands* "}"
+
 
 %import common.CNAME
 %import common.NUMBER -> INTEGER
