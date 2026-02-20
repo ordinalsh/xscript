@@ -1,8 +1,9 @@
 
 class RuntimeScript(object):
     def __init__(self):
+        self.scopes = ["script"]
         self.defines = {
-            
+            "print": {"type": "function", "scope": "script", "value": print}
         }
         self.native_calls = {}
 
@@ -40,10 +41,25 @@ class RuntimeScript(object):
         return args_list
 
     def set(self, define, value, **_): 
-        self.defines[define[1]] = {"type": "variable", "value": self.evaluate_expression(value)}
+        self.defines[define[1]] = {"type": "variable", "value": self.evaluate_expression(value), "scope": self.scopes[-1]}
 
     def call(self, function, arguments, **_): 
-        print(function, self.evaluate_args(arguments))
+        if function[1] in self.defines:
+            function_instance = self.defines[function[1]]
+
+            if not function_instance["scope"] in self.scopes:
+                raise RuntimeError("function not in current scope.")
+            
+            if not function_instance["type"] == "function": 
+                raise RuntimeError(f"{function[1]} is not callable.")
+            
+
+            if isinstance(function_instance["value"], list): ...
+            elif isinstance(function_instance["value"], object):
+                function_instance["value"](*self.evaluate_args(arguments))
+
+        else: 
+            raise RuntimeError(f"function {function[1]} not defined.")
 
 rs = RuntimeScript()
 rs.evaluate([
