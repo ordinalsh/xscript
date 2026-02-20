@@ -15,14 +15,16 @@ class RuntimeScript(object):
             operation(**astobj)
 
     def evaluate_expression(self, expr):
-        if isinstance(expr, int): return expr
-        elif isinstance(expr, str): return expr
-        elif isinstance(expr, tuple):
+        if isinstance(expr, tuple):
             expr_type = expr[0]
             if expr_type == "reference":
+
                 if expr[1] in self.defines:
-                    return self.defines[expr[1]]["value"]
+                    if self.defines[expr[1]]["scope"] in self.scopes:
+                        return self.defines[expr[1]]["value"]
+                    else: raise RuntimeError(f"variable {expr[1]} not defined in current scope.")
                 else: return None
+
             elif expr_type == "add":
                 return self.evaluate_expression(expr[1]) + self.evaluate_expression(expr[2])
             elif expr_type == "sub":
@@ -31,6 +33,8 @@ class RuntimeScript(object):
                 return self.evaluate_expression(expr[1]) * self.evaluate_expression(expr[2])
             elif expr_type == "div":
                 return self.evaluate_expression(expr[1]) / self.evaluate_expression(expr[2])
+
+        return expr
 
     def evaluate_args(self, args: list): return list(map(self.evaluate_expression, args))
 
