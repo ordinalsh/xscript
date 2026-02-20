@@ -1,1 +1,5 @@
-print("Hello world!")
+fn main(a) {
+    print(a)
+}
+
+main(1 + 2 + 3)
