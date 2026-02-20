@@ -58,7 +58,3 @@ class RunScript(object):
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
         print(self.defines.defines)
-
-    
-                
-rs = RunScript([{'op': 'set', 'define': ('reference', 'a'), 'value': 10}, {'op': 'set', 'define': ('reference', 'b'), 'value': ('reference', 'a')}])
