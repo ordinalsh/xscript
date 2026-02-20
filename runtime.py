@@ -1,69 +1,61 @@
-
-class RuntimeScript(object):
+class DefinesManager:
     def __init__(self):
         self.scopes = ["script"]
-        self.defines = {
-            "print": {"type": "function", "scope": "script", "value": print}
-        }
-        self.native_calls = {}
+        self.defines = {}
 
-    def evaluate(self, ast_list: list):
-        astobj: dict
+    def set_define(self, name, type, value):
+        scope = self.scopes[-1]
 
-        for astobj in ast_list:
-            operation = getattr(self, astobj["op"])
-            operation(**astobj)
+        if not scope in self.defines:
+            self.defines[scope] = {}
+        self.defines[scope][name] = {"type": type, "value": value}
+    
+    def free_define(self, name):
+        if not name in self.defines[self.scopes[-1]]:
+            raise RuntimeError(f"no define with name {name} found in the current scope")
+        del self.defines[self.scopes[-1]][name]
 
-    def evaluate_expression(self, expr):
-        if isinstance(expr, tuple):
-            expr_type = expr[0]
-            if expr_type == "reference":
+    def find_define(self, name):
+        for scope in reversed(self.scopes):
+            definition = self.defines[scope].get(name)
+            if definition is not None:
+                return definition
+        return None
+    
+    def add_scope(self, name_scope):
+        self.scopes.append(name_scope)
 
-                if expr[1] in self.defines:
-                    if self.defines[expr[1]]["scope"] in self.scopes:
-                        return self.defines[expr[1]]["value"]
-                    else: raise RuntimeError(f"variable {expr[1]} not defined in current scope.")
-                else: return None
+    def remove_scope(self):
+        scope_name = self.scopes[-1]
+        if scope_name == "script":
+            raise RuntimeError("cant remove scope with the name script, reserved.")
+        self.scopes.pop()
 
-            elif expr_type == "add":
-                return self.evaluate_expression(expr[1]) + self.evaluate_expression(expr[2])
-            elif expr_type == "sub":
-                return self.evaluate_expression(expr[1]) - self.evaluate_expression(expr[2])
-            elif expr_type == "mul":
-                return self.evaluate_expression(expr[1]) * self.evaluate_expression(expr[2])
-            elif expr_type == "div":
-                return self.evaluate_expression(expr[1]) / self.evaluate_expression(expr[2])
 
-        return expr
+class RunScript(object):
+    def __init__(self, ast):
+        self.defines = DefinesManager()
 
-    def evaluate_args(self, args: list): return list(map(self.evaluate_expression, args))
+        for astobject in ast:
+            operation = getattr(self, astobject["op"])
+            operation(**astobject)
 
+    def eval_expression(self, expression: tuple | int | str) -> any:
+        if not isinstance(expression, tuple): return expression
+
+        match expression[0]:
+            case "reference": # hace referencia a un objeto
+                reference = self.defines.find_define(expression[1])
+
+                if not reference: # verificar si existe la variable
+                    raise RuntimeError(f"no reference with name {expression[1]} is defined on current scope.")
+                
+                return reference["value"] # devolver la referencia
+            
     def set(self, define, value, **_): 
-        self.defines[define[1]] = {"type": "variable", "value": self.evaluate_expression(value), "scope": self.scopes[-1]}
+        self.defines.set_define(define[1], "variable", self.eval_expression(value))
+        print(self.defines.defines)
 
-    def call(self, function, arguments, **_): 
-        if function[1] in self.defines:
-            function_instance = self.defines[function[1]]
-
-            if not function_instance["scope"] in self.scopes:
-                raise RuntimeError("function not in current scope.")
-            
-            if not function_instance["type"] == "function": 
-                raise RuntimeError(f"{function[1]} is not callable.")
-            
-
-            if isinstance(function_instance["value"], list): ...
-            elif isinstance(function_instance["value"], object):
-                function_instance["value"](*self.evaluate_args(arguments))
-
-        else: 
-            raise RuntimeError(f"function {function[1]} not defined.")
-
-rs = RuntimeScript()
-rs.evaluate([
-    {'op': 'set', 'define': ('reference', 'a'), 'value': 10},
-    {'op': 'set', 'define': ('reference', 'b'), 'value': 20},
-    {'op': 'set', 'define': ('reference', 'c'), 'value': ('add', ('reference', 'a'), ('reference', 'b'))},
-    {'op': 'set', 'define': ('reference', 'd'), 'value': ('add', ('reference', 'a'), ('add', ('reference', 'b'), ('mul', ('reference', 'c'), 2)))},
-    {'op': 'call', 'function': ('reference', 'print'), 'arguments': [('reference', 'a'), ('reference', 'b'), ('reference', 'c'), ('reference', 'd')]}
-])
+    
+                
+rs = RunScript([{'op': 'set', 'define': ('reference', 'a'), 'value': 10}, {'op': 'set', 'define': ('reference', 'b'), 'value': ('reference', 'a')}])

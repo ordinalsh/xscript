@@ -46,11 +46,7 @@ fi: "if" condition "{" commands* "}"
 
 test_code = """
 local a = 10
-local b = 20
-local c = a + b
-local d = a+b+c*2
-
-print(a,b,c,d)
+local b = a
 """
 
 parser = Lark(grammar, parser="lalr")
