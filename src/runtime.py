@@ -97,7 +97,6 @@ class RunScript(object):
 
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
-        print(self.defines.defines)
 
     def call(self, function, arguments, **_):
         function = function[1]
@@ -123,6 +122,9 @@ class RunScript(object):
             "arguments": arguments,
             "block": block,
         })
+
+    def fi(self, condition, block, child, **_):
+        print(condition, block, child)
 
     def free(self, scope, name, **_):
         if not scope in self.defines.defines:

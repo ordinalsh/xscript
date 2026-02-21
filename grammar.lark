@@ -11,6 +11,7 @@
     | expr "*" expr -> mul
 
 arg_names: CNAME ("," CNAME)*
+block: commands*
 ?member: expr "." CNAME
     
 require: "require" STRING "as" CNAME
@@ -28,7 +29,9 @@ condition: expr
           | condition ">=" condition -> gte
           | condition "<=" condition -> lte
 
-fi: "if" condition "{" commands* "}"
+fi: "if" condition "{" block "}" (elfi | elsf)?
+elfi: "elseif" condition "{" block "}" (elfi | elsf)?
+elsf: "else" "{" block "}"
 
 
 %import common.CNAME

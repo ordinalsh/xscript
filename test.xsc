@@ -1,5 +1,9 @@
-fn main(a) {
-    print(a)
-}
+local a = 30
 
-main(1 + 2 + 3)
+if a == 20 {
+    print("Es 20")
+} elseif a == 30 {
+    print("Es 30")
+} else {
+    print("Nothing")
+}

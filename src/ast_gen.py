@@ -14,6 +14,7 @@ class XScriptAST(Transformer):
     def CNAME(self, token): return ("reference", str(token))
     def member(self, items): return ("reference_group", *(item[1] for item in items))
     def arg_names(self, items): return [item[1] for item in items]
+    def block(self, items): return items
 
     # condiciones
     def condition(self, items): return items[0]
@@ -33,7 +34,15 @@ class XScriptAST(Transformer):
 
     # flujos
     def fi(self, items):
-        return {"op": "fi", "condition": items[0], "block": items[1:]}
+        child = items[2] if len(items) > 2 else None
+        return {"op": "fi", "condition": items[0], "block": items[1], "child": child}
+
+    def elfi(self, items):
+        child = items[2] if len(items) > 2 else None
+        return {"op": "elfi", "condition": items[0], "block": items[1], "child": child}
+
+    def elsf(self, items):
+        return {"op": "elsf", "block": items[0]}
 
     # expresiones
     def plus(self, items): return ("add", items[0], items[1])
