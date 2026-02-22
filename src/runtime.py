@@ -94,6 +94,17 @@ class RunScript(object):
         self.run_block(fn_block)
         self.defines.remove_scope()
 
+    def eval_condition(self, condition):
+        a = self.eval_expression(condition[1])
+        b = self.eval_expression(condition[2])
+
+        match condition[0]:
+            case "equ": return a == b
+            case "nequ": return a != b
+            case "gt": return a > b
+            case "lt": return a < b
+            case "gte": return a <= b
+            case "lte": return a >= b
 
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
@@ -124,7 +135,17 @@ class RunScript(object):
         })
 
     def fi(self, condition, block, child, **_):
-        print(condition, block, child)
+        if self.eval_condition(condition):
+            self.run_block(block)
+            return
+        
+        if child:
+            child_operation = child["op"]
+            if child_operation == "elfi":
+                self.fi(**child)
+            elif child_operation == "elsf":
+                child_block = child["block"]
+                self.run_block(child_block)
 
     def free(self, scope, name, **_):
         if not scope in self.defines.defines:

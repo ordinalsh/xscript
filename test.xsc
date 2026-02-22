@@ -1,4 +1,4 @@
-local a = 30
+local a = 20
 
 if a == 20 {
     print("Es 20")
