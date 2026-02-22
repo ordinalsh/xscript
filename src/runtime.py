@@ -95,17 +95,32 @@ class RunScript(object):
         self.defines.remove_scope()
 
     def eval_condition(self, condition):
-        a = self.eval_expression(condition[1])
-        b = self.eval_expression(condition[2])
+        if not isinstance(condition, tuple):
+            return bool(condition)
 
-        match condition[0]:
-            case "equ": return a == b
-            case "nequ": return a != b
-            case "gt": return a > b
-            case "lt": return a < b
-            case "gte": return a <= b
-            case "lte": return a >= b
+        op = condition[0]
 
+        if op == "and":
+            return self.eval_condition(condition[1]) and self.eval_condition(condition[2])
+        if op == "or":
+            return self.eval_condition(condition[1]) or self.eval_condition(condition[2])
+        if op == "not":
+            return not self.eval_condition(condition[1])
+
+        left_val = self.eval_expression(condition[1])
+        right_val = self.eval_expression(condition[2])
+
+        match op:
+            case "equ":  return left_val == right_val
+            case "nequ": return left_val != right_val
+            case "gt":   return left_val > right_val
+            case "lt":   return left_val < right_val
+            case "gte":  return left_val >= right_val
+            case "lte":  return left_val <= right_val
+            case _:
+                return bool(self.eval_expression(condition))
+        
+        
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
 
@@ -135,6 +150,7 @@ class RunScript(object):
         })
 
     def fi(self, condition, block, child, **_):
+        print(self.eval_condition(condition))
         if self.eval_condition(condition):
             self.run_block(block)
             return

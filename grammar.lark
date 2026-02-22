@@ -29,8 +29,12 @@ condition: expr
           | condition ">=" condition -> gte
           | condition "<=" condition -> lte
 
-fi: "if" condition "{" block "}" (elfi | elsf)?
-elfi: "elseif" condition "{" block "}" (elfi | elsf)?
+?logic_condition: condition 
+    | logic_condition "and" condition -> andc
+    | logic_condition "or" condition -> orc
+
+fi: "if" logic_condition "{" block "}" (elfi | elsf)?
+elfi: "elseif" logic_condition "{" block "}" (elfi | elsf)?
 elsf: "else" "{" block "}"
 
 

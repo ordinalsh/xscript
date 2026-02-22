@@ -24,6 +24,8 @@ class XScriptAST(Transformer):
     def lt(self, items): return ("lt", items[0], items[1])
     def gte(self, items): return ("gte", items[0], items[1])
     def lte(self, items): return ("gte", items[0], items[1])
+    def andc(self, items): return ("and", items[0], items[1])
+    def orc(self, items): return ("or", items[0], items[1])
 
     # funciones, variables y llamadas
     def set(self, items): return {"op": "set", "define": items[0], "value": items[1]}
