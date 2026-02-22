@@ -1,5 +1,5 @@
-local a = 20
-
-if a == 20 and a != 30 {
-    print("Great")
+fn factorizeTwoNumbers (a, b) {
+    return a
 }
+
+print(factorizeTwoNumbers(18, 9))

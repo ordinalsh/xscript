@@ -1,11 +1,25 @@
 from rich import print
+class API:
+    def factorize(n):
+        i = 2
+        factors = []
+        while i * i <= n:
+            if n % i:
+                i += 1
+            else:
+                n //= i
+                factors.append(i)
+        if n > 1:
+            factors.append(n)
+        return factors
 
 class DefinesManager:
     def __init__(self):
         self.scopes = ["script"]
         self.defines = {
             "script": {
-                "print": {"type": "function", "value": print}
+                "print": {"type": "function", "value": print},
+                "factorize": {"type": "function", "value": API.factorize}
             }
         }
 
@@ -42,8 +56,8 @@ class RunScript(object):
     def __init__(self, ast):
         self.defines = DefinesManager()
 
-        print(ast)
-        print("\n","·"*132,"\n")
+        #print(ast)
+        #print("\n","·"*132,"\n")
 
         if not isinstance(ast, list):
             ast = [ast]
@@ -56,6 +70,11 @@ class RunScript(object):
             operation(**astobject)
 
     def eval_expression(self, expression: tuple | int | str) -> any:
+        if isinstance(expression, dict):
+            operation = expression["op"]
+            if operation == "call":
+                return self.call(**expression)
+            
         if not isinstance(expression, tuple): return expression
 
         match expression[0]:
@@ -76,7 +95,7 @@ class RunScript(object):
 
     def eval_function(self, fnname, arguments):
         function = self.defines.find_define(fnname)
-        fn_arguments = function["value"]["arguments"]
+        fn_arguments = function["value"]["arguments"] or []
         fn_block = function["value"]["block"]
 
         if function["type"] != "function":
@@ -120,12 +139,13 @@ class RunScript(object):
             case _:
                 return bool(self.eval_expression(condition))
         
-        
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
 
     def call(self, function, arguments, **_):
         function = function[1]
+
+        #print(self.defines.defines)
 
         callable_define = self.defines.find_define(function)
         if not callable_define:
@@ -141,7 +161,9 @@ class RunScript(object):
 
         elif isinstance(callable_value, object):
             #print(self.eval_arguments(arguments))
-            callable_value(*self.eval_arguments(arguments))
+            return callable_value(*self.eval_arguments(arguments))
+
+        return None
 
     def new_function(self, name, block, arguments=None, **_):
         self.defines.set_define(name, "function", {
@@ -149,8 +171,11 @@ class RunScript(object):
             "block": block,
         })
 
+        if not name in self.defines.defines:
+            self.defines.defines[name] = {}
+
     def fi(self, condition, block, child, **_):
-        print(self.eval_condition(condition))
+        #print(self.eval_condition(condition))
         if self.eval_condition(condition):
             self.run_block(block)
             return
