@@ -69,6 +69,16 @@ class RunScript(object):
             operation = getattr(self, astobject["op"])
             operation(**astobject)
 
+    def run_function(self, ast):
+        for astobject in ast:
+            #print(astobject)
+            operation = getattr(self, astobject["op"])
+            response = operation(**astobject)
+            if response: return response
+
+        return None
+        
+
     def eval_expression(self, expression: tuple | int | str) -> any:
         if isinstance(expression, dict):
             operation = expression["op"]
@@ -110,8 +120,10 @@ class RunScript(object):
         for index, argument in enumerate(arguments):
             self.defines.set_define(fn_arguments[index], "variable", argument) # los argumentos ya estan parseados por el eval_expression
         
-        self.run_block(fn_block)
+        response = self.run_function(fn_block)
         self.defines.remove_scope()
+
+        return response
 
     def eval_condition(self, condition):
         if not isinstance(condition, tuple):
@@ -139,6 +151,9 @@ class RunScript(object):
             case _:
                 return bool(self.eval_expression(condition))
         
+    def ret(self, value, **_):
+        return self.eval_expression(value)
+
     def set(self, define, value, **_): 
         self.defines.set_define(define[1], "variable", self.eval_expression(value))
 
@@ -157,7 +172,7 @@ class RunScript(object):
             raise RuntimeError(f"no define with name '{function}' that can be callable.")
         
         if isinstance(callable_value, dict): 
-            self.eval_function(function, self.eval_arguments(arguments))
+            return self.eval_function(function, self.eval_arguments(arguments))
 
         elif isinstance(callable_value, object):
             #print(self.eval_arguments(arguments))
@@ -177,8 +192,8 @@ class RunScript(object):
     def fi(self, condition, block, child, **_):
         #print(self.eval_condition(condition))
         if self.eval_condition(condition):
-            self.run_block(block)
-            return
+            return self.run_function(block)
+            
         
         if child:
             child_operation = child["op"]
@@ -186,7 +201,7 @@ class RunScript(object):
                 self.fi(**child)
             elif child_operation == "elsf":
                 child_block = child["block"]
-                self.run_block(child_block)
+                return self.run_function(child_block)
 
     def free(self, scope, name, **_):
         if not scope in self.defines.defines:

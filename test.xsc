@@ -1,5 +1,8 @@
 fn factorizeTwoNumbers (a, b) {
-    return a
+    if b == 9 {
+        return a
+    }
+    print("This will continue?")
 }
 
 print(factorizeTwoNumbers(18, 9))
