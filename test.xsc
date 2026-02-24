@@ -1,8 +1,9 @@
-fn factorizeTwoNumbers (a, b) {
-    if b == 9 {
-        return a
-    }
-    print("This will continue?")
+fn getNumber(num) {
+    local f = 10*2 + num 
+    return f/num
 }
 
-print(factorizeTwoNumbers(18, 9))
+local a = 10
+local b = getNumber(a)
+
+print(a,b)
