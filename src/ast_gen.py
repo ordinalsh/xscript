@@ -1,6 +1,5 @@
 from lark import Lark
 from lark.visitors import Transformer
-from rich import print
 
 grammar = open("grammar.lark", "r")
 parser = Lark(grammar, parser="lalr")
