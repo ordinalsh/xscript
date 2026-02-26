@@ -29,6 +29,8 @@ class XSEvaluator(object):
             if EXPR_OP == "reference": 
                 XSObj = self.defines.find_define(expression[1])
 
+                if not XSObj: return None
+
                 if XSObj.kind == 2: return self.evaluate_expression(XSObj.value)
                 else: raise RuntimeError("Can't return a reference as a variable if it has been defined as a function.")  
 
