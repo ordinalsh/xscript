@@ -11,6 +11,7 @@ fn num {
 }
 
 num()
+print(z)
 """
 ast = XScriptAST().transform(parser.parse(code))
 
