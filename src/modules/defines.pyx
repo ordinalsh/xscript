@@ -51,11 +51,17 @@ cdef class Defines:
     cpdef remove_scope(self):
         if self.stack.empty():
             raise RuntimeError("There are no local scopes left to remove")
-        
-        # Al hacer pop, los punteros se pierden. 
-        # En una versión Pro, aquí haríamos Py_DECREF de los objetos del mapa
+
+        cdef ScopeMap last_scope = self.stack.back()
+        cdef PyObject* ptr
+
+        for item in last_scope:
+            ptr = item.second
+            Py_DECREF(<object>ptr)
+
+        # Ahora sí, borramos el contenedor de C++ con seguridad
         self.stack.pop_back()
-    
+        
     cpdef set_object(self, int kind, str name, object value):
         cdef string c_name = name.encode('utf-8')
         cdef XSObject obj = XSObject(kind, value)
