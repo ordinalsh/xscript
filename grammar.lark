@@ -1,5 +1,5 @@
 ?start: commands*
-?commands: set | require | call | func | fi | free | ret
+?commands: set | require | call | func | fi | ret
 
 ?atom: CNAME | INTEGER | STRING
 ?expr: call
@@ -19,7 +19,6 @@ set: "local" CNAME "=" expr
 call: expr "("(expr ("," expr)*)?")"
 func: "fn" CNAME "{" commands* "}" | "fn" CNAME "("")" "{" commands* "}"
     | "fn" CNAME "(" arg_names ")" "{" commands* "}" -> func_args
-free: "free" CNAME":"CNAME
 ret: "return" expr
 
 condition: expr
