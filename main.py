@@ -2,10 +2,15 @@ from src.runtime import Runtime, XSEvaluator
 from src.ast_gen import XScriptAST, parser
 
 code = """
-local x = 10
-local y = 20
+fn num {
+    local x = 10
+    local y = 20
+    local z = x + y*2
 
-local z = x + y*2
+    print(z)
+}
+
+num()
 """
 ast = XScriptAST().transform(parser.parse(code))
 
