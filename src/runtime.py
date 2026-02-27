@@ -7,6 +7,8 @@ class XSEvaluator(object):
         self.defines.set_object(1, "print", print)
 
     def evaluate_ast(self, ast: list, no_stop_on_return: bool = True) -> any:
+        if type(ast) is dict: ast = [ast]
+
         for command in ast:
             operation = getattr(self, command["op"], None)
             if operation:
@@ -28,11 +30,16 @@ class XSEvaluator(object):
             if EXPR_OP == "div": return self.evaluate_expression(expression[1]) / self.evaluate_expression(expression[2])
             if EXPR_OP == "reference": 
                 XSObj = self.defines.find_define(expression[1])
-
                 if not XSObj: return None
 
-                if XSObj.kind == 2: return self.evaluate_expression(XSObj.value)
+                if XSObj.kind == 2:
+                    return XSObj.value
                 else: raise RuntimeError("Can't return a reference as a variable if it has been defined as a function.")  
+            if EXPR_OP == "call_expr":
+                EXPR_FN_NAME = expression[1]
+                EXPR_ARG_LIST = expression[2]
+
+                return self.evaluate_function(EXPR_FN_NAME, EXPR_ARG_LIST)
 
         return None
 
@@ -40,7 +47,10 @@ class XSEvaluator(object):
         obj = self.defines.find_define(name)
 
         if not obj: raise RuntimeError(f"No define with name '{name}' is callable")
-        if obj.kind == 1 or obj.kind == 2: raise RuntimeError(f"You can't call '{name}' because is a variable or a native function.")
+        if obj.kind == 1: 
+            return obj.value(*arguments)
+        elif obj.kind == 2:
+            raise RuntimeError(f"No define with name '{name}' is callable")
 
         fn_arguments = obj.value["arguments"] or []
         fn_block = obj.value["block"]
@@ -52,20 +62,26 @@ class XSEvaluator(object):
         
         self.defines.add_scope() # Añadimos nuevo stack
         for index,argument in enumerate(arguments):
-            self.defines.set_object(2, fn_arguments[index], argument) # Añadimos al scope el argumento con el nombre como una variable.
+            result = self.evaluate_expression(argument)
+            self.defines.set_object(2, fn_arguments[index], result) # Añadimos al scope el argumento con el nombre como una variable.
 
         response = self.evaluate_ast(fn_block, False) # Que devuelva cuando haya un return.
         self.defines.remove_scope() # Eliminamos del stack el scope.
 
         return response # Devolvemos la respuesta del AST
 
-    def set(self, define, value, **_): self.defines.set_object(2, define[1], self.evaluate_expression(value)) # Agregar define como objeto tipo variable.
+    def set(self, define, value, **_): 
+        resultado = self.evaluate_expression(value)
+        self.defines.set_object(2, define[1], resultado) # Agregar define como objeto tipo variable.
     
     def new_function(self, name, arguments=None, block=None, **_):
         self.defines.set_object(3,name,{
             "arguments":arguments,
             "block":block
         })
+
+    def ret(self, value, **_): # Esencial hermano :)
+        return self.evaluate_expression(value)
 
     def call(self, function, arguments, **_):
         arguments = list(map(self.evaluate_expression, arguments))        
@@ -75,10 +91,7 @@ class XSEvaluator(object):
         if not obj: raise RuntimeError(f"No define with name '{name}' is callable")
         elif obj.kind == 2: raise RuntimeError(f"You can't call '{name}' because is a variable.")
         
-        if obj.kind == 1: # Es una funcion nativa de python.
-            obj.value(*arguments)
-        elif obj.kind == 3: # Es una funcion de XScript tipo XSObject.
-            self.evaluate_function(name, arguments)
+        self.evaluate_function(name, arguments)
         
 
 class Runtime(object):
