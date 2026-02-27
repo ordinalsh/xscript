@@ -4,6 +4,9 @@ class XSEvaluator(object):
     def __init__(self):
         self.defines = Defines()
         self.defines.set_object(1, "print", print)
+        
+        self.defines.set_object(2, "true", True) # booleanos como variables, es raro
+        self.defines.set_object(2, "false", False) 
 
     def evaluate_ast(self, ast: list, no_stop_on_return: bool = True):
         if isinstance(ast, dict): ast = [ast]
@@ -94,15 +97,19 @@ class XSEvaluator(object):
             if EXPR_OP == "lt": return self.evaluate_expression(condition[1]) < self.evaluate_expression(condition[2])
             if EXPR_OP == "gte": return self.evaluate_expression(condition[1]) >= self.evaluate_expression(condition[2])
             if EXPR_OP == "lte": return self.evaluate_expression(condition[1]) <= self.evaluate_expression(condition[2])
+            if EXPR_OP == "reference": return self.evaluate_expression(condition[1])
 
         return None
 
     def fi(self, condition, block, child, **_):
         result = self.evaluate_condition(condition)
 
-        if result: return self.evaluate_ast(block, False)
-        elif child["op"] == "elfi": return self.fi(**child)
-        elif child["op"] == "elsf": return self.evaluate_ast(child["block"], False)
+        if result: 
+            return self.evaluate_ast(block, False)
+
+        if child:
+            if child["op"] == "elfi": return self.fi(**child)
+            elif child["op"] == "elsf": return self.evaluate_ast(child["block"], False)
 
     def set(self, define, value, **_): 
         resultado = self.evaluate_expression(value)
