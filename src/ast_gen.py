@@ -11,6 +11,7 @@ class XScriptAST(Transformer):
     def INTEGER(self, token): return int(token)
     def STRING(self, token): return token[1:-1]
     def CNAME(self, token): return ("reference", str(token))
+
     def member(self, items): return ("reference_group", *(item[1] for item in items))
     def arg_names(self, items): return [item[1] for item in items]
     def block(self, items): return items

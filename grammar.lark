@@ -37,9 +37,9 @@ fi: "if" logic_condition "{" block "}" (elfi | elsf)?
 elfi: "elseif" logic_condition "{" block "}" (elfi | elsf)?
 elsf: "else" "{" block "}"
 
-
+INTEGER: "-"NUMBER | "+"NUMBER | NUMBER
 %import common.CNAME
-%import common.NUMBER -> INTEGER
+%import common.NUMBER -> NUMBER
 %import common.ESCAPED_STRING -> STRING
 %import common.WS
 
