@@ -2,7 +2,7 @@
 ?commands: set | require | call | func | fi | ret
 
 ?atom: CNAME | INTEGER | STRING
-?expr: call
+?expr: call -> call_on_expr
     | member
     | atom
     | expr "+" expr -> plus

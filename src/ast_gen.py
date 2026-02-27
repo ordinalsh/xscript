@@ -51,3 +51,5 @@ class XScriptAST(Transformer):
     def sub(self, items): return ("sub", items[0], items[1])
     def mul(self, items): return ("mul", items[0], items[1])
     def div(self, items): return ("div", items[0], items[1])
+    def call_on_expr(self, items): operation = items[0]; return ("call_expr" ,operation["function"][1], operation["arguments"])
+
