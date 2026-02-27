@@ -6,21 +6,20 @@ class XSEvaluator(object):
         self.defines.set_object(1, "print", print)
 
     def evaluate_ast(self, ast: list, no_stop_on_return: bool = True):
-        if type(ast) is dict: ast = [ast]
+        if isinstance(ast, dict): ast = [ast]
 
         for command in ast:
             operation = getattr(self, command["op"], None)
             if operation:
                 response = operation(**command)
-                if response and not no_stop_on_return: return response
-            else: raise RuntimeError(f"No operation named '{command["op"]}' is avaliable.")
+                if response is not None and not no_stop_on_return: return response
+            else: raise RuntimeError(f"No operation named '{command['op']}' is available.")
         return None
 
     def evaluate_expression(self, expression):
-        t = type(expression)
-        if t is str or t is int: return expression
+        if isinstance(expression, (str, int, float, bool)): return expression
 
-        if t is tuple:
+        if isinstance(expression, tuple):
             EXPR_OP = expression[0]
 
             if EXPR_OP == "add": return self.evaluate_expression(expression[1]) + self.evaluate_expression(expression[2])
@@ -46,22 +45,25 @@ class XSEvaluator(object):
         obj = self.defines.find_define(name)
 
         if not obj: raise RuntimeError(f"No define with name '{name}' is callable")
+
+        # Evaluamos los argumentos antes de ejecutar la función
+        evaluated_arguments = [self.evaluate_expression(arg) for arg in arguments]
+
         if obj.kind == 1: 
-            return obj.value(*arguments)
+            return obj.value(*evaluated_arguments)
         elif obj.kind == 2:
             raise RuntimeError(f"No define with name '{name}' is callable")
 
         fn_arguments = obj.value["arguments"] or []
         fn_block = obj.value["block"]
 
-        if len(fn_arguments) > len(arguments):
+        if len(fn_arguments) > len(evaluated_arguments):
             raise RuntimeError(f"the function '{name}' requires those arguments {fn_arguments}")
-        elif len(arguments) > len(fn_arguments):
-            raise RuntimeError(f"the function '{name}' only accepts {len(fn_arguments)} arguments, but you passed {len(arguments)}")
+        elif len(evaluated_arguments) > len(fn_arguments):
+            raise RuntimeError(f"the function '{name}' only accepts {len(fn_arguments)} arguments, but you passed {len(evaluated_arguments)}")
         
         self.defines.add_scope() # Añadimos nuevo stack
-        for index,argument in enumerate(arguments):
-            result = self.evaluate_expression(argument)
+        for index, result in enumerate(evaluated_arguments):
             self.defines.set_object(2, fn_arguments[index], result) # Añadimos al scope el argumento con el nombre como una variable.
 
         response = self.evaluate_ast(fn_block, False) # Que devuelva cuando haya un return.
@@ -83,15 +85,8 @@ class XSEvaluator(object):
         return self.evaluate_expression(value)
 
     def call(self, function, arguments, **_):
-        arguments = list(map(self.evaluate_expression, arguments))        
         name = function[1]
-        obj = self.defines.find_define(name)
-
-        if not obj: raise RuntimeError(f"No define with name '{name}' is callable")
-        elif obj.kind == 2: raise RuntimeError(f"You can't call '{name}' because is a variable.")
-        
         self.evaluate_function(name, arguments)
-
 
 class Runtime(object):
     ...
