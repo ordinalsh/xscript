@@ -2,10 +2,17 @@ from src.runtime import Runtime, XSEvaluator
 from src.ast_gen import XScriptAST, parser
 
 code = """
-fn myNum(a) { return a }
-local a = 10
-local a = myNum(a) + 10
+fn test(a,b) {
+    local result = a + b
+    if result > 10 {
+        return "mayor que diez"
+    } else {
+        return "menor que diez"
+    }
+    print("esto se imprime?")
+}
 
+local a = test(10, 20)
 print(a)
 """
 ast = XScriptAST().transform(parser.parse(code))
