@@ -31,7 +31,6 @@ class XScriptAST(Transformer):
     def call(self, items): return {"op": "call", "function": items[0], "arguments": items[1:]}
     def func(self, items): return {"op": "new_function", "name": items[0][1], "block": items[1:]}
     def func_args(self, items): return {"op": "new_function", "name": items[0][1], "arguments": items[1], "block": items[2:]}
-    #def free(self, items): return {"op": "free", "scope": items[0][1], "name": items[1][1]}
     def ret(self, items): return {"op": "ret", "value": items[0]}
 
     # flujos

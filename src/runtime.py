@@ -12,7 +12,8 @@ class XSEvaluator(object):
             operation = getattr(self, command["op"], None)
             if operation:
                 response = operation(**command)
-                if response is not None and not no_stop_on_return: return response
+                if response is not None and not no_stop_on_return:
+                    return response
             else: raise RuntimeError(f"No operation named '{command['op']}' is available.")
         return None
 
@@ -70,6 +71,38 @@ class XSEvaluator(object):
         self.defines.remove_scope() # Eliminamos del stack el scope.
 
         return response # Devolvemos la respuesta del AST
+
+    def evaluate_condition(self, condition):
+        """
+            ("and", expr, expr)
+            ("or", expr, expr)
+            ("equ", expr, expr)
+            ("nequ", expr, expr)
+            ("gt", expr, expr)
+            ("lt", expr, expr)
+            ("gte", expr, expr)
+            ("lte", expr, expr)
+        """
+        if isinstance(condition, tuple):
+            EXPR_OP = condition[0]
+
+            if EXPR_OP == "and": return self.evaluate_condition(condition[1]) and self.evaluate_condition(condition[2])
+            if EXPR_OP == "or": return self.evaluate_condition(condition[1]) or self.evaluate_condition(condition[2])
+            if EXPR_OP == "equ": return self.evaluate_expression(condition[1]) == self.evaluate_expression(condition[2])
+            if EXPR_OP == "nequ": return self.evaluate_expression(condition[1]) != self.evaluate_expression(condition[2])
+            if EXPR_OP == "gt": return self.evaluate_expression(condition[1]) > self.evaluate_expression(condition[2])
+            if EXPR_OP == "lt": return self.evaluate_expression(condition[1]) < self.evaluate_expression(condition[2])
+            if EXPR_OP == "gte": return self.evaluate_expression(condition[1]) >= self.evaluate_expression(condition[2])
+            if EXPR_OP == "lte": return self.evaluate_expression(condition[1]) <= self.evaluate_expression(condition[2])
+
+        return None
+
+    def fi(self, condition, block, child, **_):
+        result = self.evaluate_condition(condition)
+
+        if result: return self.evaluate_ast(block, False)
+        elif child["op"] == "elfi": return self.fi(**child)
+        elif child["op"] == "elsf": return self.evaluate_ast(child["block"], False)
 
     def set(self, define, value, **_): 
         resultado = self.evaluate_expression(value)
