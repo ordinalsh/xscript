@@ -1,12 +1,11 @@
-# TODO : Reescribir todo el Runtime Desde cero con el nuevo engine. Hacerlo mas modular y posiblemente, en futuras versiones transicion de Cython.
-from .modules.defines import Defines, XSObject
+from .modules.defines import Defines # El defines
 
 class XSEvaluator(object):
     def __init__(self):
         self.defines = Defines()
         self.defines.set_object(1, "print", print)
 
-    def evaluate_ast(self, ast: list, no_stop_on_return: bool = True) -> any:
+    def evaluate_ast(self, ast: list, no_stop_on_return: bool = True):
         if type(ast) is dict: ast = [ast]
 
         for command in ast:
@@ -92,7 +91,7 @@ class XSEvaluator(object):
         elif obj.kind == 2: raise RuntimeError(f"You can't call '{name}' because is a variable.")
         
         self.evaluate_function(name, arguments)
-        
+
 
 class Runtime(object):
     ...
