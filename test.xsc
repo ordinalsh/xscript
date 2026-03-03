@@ -1,9 +1,0 @@
-fn getNumber(num) {
-    local f = 10*2 + num 
-    return f/num
-}
-
-local a = 10
-local b = getNumber(a)
-
-print(a,b)
