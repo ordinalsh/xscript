@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XScript | The Ordinalsh Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <canvas id="skyCanvas"></canvas>
+
+    <div class="content-wrapper">
+        <section class="hero">
+            <aside class="sidebar">
+                <div class="tag">BY ORDINALSH</div>
+                <h1>XSCRIPT</h1>
+                <div class="description">
+                    <p><b>XScript</b> es un motor de ejecución ligero diseñado para la automatización de próxima generación. Velocidad pura y arquitectura modular.</p>
+                </div>
+                <a href="#releases" class="btn-get-started">Get Started</a>
+            </aside>
+            <div class="hero-visual"></div>
+        </section>
+
+        <section id="releases" class="releases-section">
+            <h2 class="section-title">Releases</h2>
+            
+            <div class="release-grid">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="dot t-red"></div><div class="dot t-yel"></div><div class="dot t-gre"></div>
+                        <span style="margin-left: 10px; color: #444; font-size: 0.7rem;">xscript_cli — terminal</span>
+                    </div>
+                    <div class="t-cmd">$ py xscript_program.py</div>
+                    <div class="t-text">This script is running XScript inside</div>
+                    <div class="t-green">XScript: 'Hello world'</div>
+                    <div class="t-gray">XScript: ran in 0.0001 seg</div>
+                    <div class="t-cmd">$ <span class="cursor"></span></div>
+                </div>
+
+                <div class="vertical-divider"></div>
+
+                <div id="dynamic-builds" class="builds-container"></div>
+            </div>
+            
+            <p style="margin-top: 80px; color: #222; font-size: 0.7rem; letter-spacing: 5px; font-weight: 900;">ORDINALSH PROTOCOL // 2026</p>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
