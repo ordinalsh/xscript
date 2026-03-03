@@ -1,0 +1,23 @@
+[
+  {
+    "type": "stable",
+    "title": "Latest Build",
+    "version": "v0.0",
+    "url": "https://download.xscript.com/stable",
+    "changelog": [
+      "Verified Security Patches",
+      "High-availability core",
+      "Win / Linux / Mac"
+    ]
+  },
+  {
+    "type": "beta",
+    "title": "Beta Preview",
+    "version": "v1.0-pre",
+    "url": "https://github.com/ordinalsh/xscript/releases",
+    "changelog": [
+      "First version",
+      "Not complete and unstable."
+    ]
+  }
+]
