@@ -1,7 +1,7 @@
 ?start: commands*
 ?commands: set | require | call | func | fi | ret
 
-?atom: CNAME | INTEGER | STRING
+?atom: CNAME | INTEGER | STRING | dict
 ?expr: call -> call_on_expr
     | member
     | atom
@@ -14,6 +14,9 @@ arg_names: CNAME ("," CNAME)*
 block: commands*
 ?member: expr "." CNAME
     
+dict_key: CNAME ":" expr
+dict: "{" dict_key ("," dict_key)* "}"
+
 require: "require" STRING "as" CNAME
 set: "local" CNAME "=" expr
 call: expr "("(expr ("," expr)*)?")"

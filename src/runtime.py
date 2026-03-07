@@ -21,7 +21,7 @@ class XSEvaluator(object):
         return None
 
     def evaluate_expression(self, expression):
-        if isinstance(expression, (str, int, float, bool)): return expression
+        if isinstance(expression, (str, int, float, bool, dict)): return expression
 
         if isinstance(expression, tuple):
             EXPR_OP = expression[0]
@@ -42,6 +42,20 @@ class XSEvaluator(object):
                 EXPR_ARG_LIST = expression[2]
 
                 return self.evaluate_function(EXPR_FN_NAME, EXPR_ARG_LIST)
+            if EXPR_OP == "reference_group":
+                XSObj = self.defines.find_define(expression[1])
+                if not XSObj: return None
+
+                value = XSObj.value
+
+                if XSObj.kind == 2 and isinstance(value, dict):
+                    for key in expression[2:]:
+                        if isinstance(value, dict):
+                            value = value.get(key)
+                        else:
+                            return None
+
+                return value
 
         return None
 

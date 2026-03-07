@@ -2,7 +2,8 @@ from src.runtime import Runtime, XSEvaluator
 from src.ast_gen import XScriptAST, parser
 
 code = """
-if true { print("es perfecto") }
+local a = {a: 10}
+print(a.a)
 """
 ast = XScriptAST().transform(parser.parse(code))
 
